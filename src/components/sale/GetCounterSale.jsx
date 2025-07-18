@@ -17,9 +17,10 @@ import SaleReportPrint from "../Invoice/SaleReport";
 import UserPrivateComponent from "../PrivacyComponent/UserPrivateComponent";
 import AddSale from "./addSale";
 import { loadSingleCounter } from "../../redux/rtk/features/counter/counterSlice";
+import getPermissions from "../../utils/getPermissions";
 
 const GetAllCounterSale = () => {
-    const {id} = useParams();
+  const {id} = useParams();
   const dispatch = useDispatch();
   const {list, total, loading: saleLoading, } = useSelector((state) => state.sales);
   const {counter } = useSelector((state) => state.counters);
@@ -32,6 +33,11 @@ const GetAllCounterSale = () => {
     moment().endOf("month").format("YYYY-MM-DD")
   );
   const [loading, setLoading] = useState(false);
+  const permissions = getPermissions();
+  
+    const hasPermission = (item) => {
+      return permissions?.includes(item ? item : "");
+    };
 
   const columns = [
     {
@@ -109,17 +115,20 @@ const GetAllCounterSale = () => {
       render: (id, { dueAmount }) => (
         <div className='flex '>
           <ViewBtn path={`/admin/sale/${id}`} />
-          <Link
-            to={dueAmount ? `/admin/payment/customer/${id}` : "#"}
-            state={{ dueAmount: dueAmount || 0 }}
-          >
-            <button
-              className='btn btn-dark btn-sm bg-violet-500 hover:bg-violet-700 text-white font-bold py-1  px-3  rounded mr-2 disabled:bg-gray-400'
-              disabled={!dueAmount}
+          {
+            hasPermission("create-paymentSaleInvoice") &&
+            <Link
+              to={dueAmount ? `/admin/payment/customer/${id}` : "#"}
+              state={{ dueAmount: dueAmount || 0 }}
             >
-              Payment
-            </button>
-          </Link>
+              <button
+                className='btn btn-dark btn-sm bg-violet-500 hover:bg-violet-700 text-white font-bold py-1  px-3  rounded mr-2 disabled:bg-gray-400'
+                disabled={!dueAmount}
+              >
+                Payment
+              </button>
+            </Link>
+          }
         </div>
       ),
     },
@@ -206,23 +215,6 @@ const GetAllCounterSale = () => {
                 layout={"inline"}
                 onFinishFailed={() => setLoading(false)}
               >
-                <Form.Item name='user'>
-                  <Select
-                    className='salelist-saleperson-input'
-                    loading={!userList}
-                    placeholder='Sale Person'
-                    style={{ width: 200 }}
-                    allowClear
-                  >
-                    <Select.Option value=''>All</Select.Option>
-                    {userList &&
-                      userList.map((i, index) => (
-                        <Select.Option key={index} value={i.id}>
-                          {i.username}
-                        </Select.Option>
-                      ))}
-                  </Select>
-                </Form.Item>
                 <div className=' mr-2'>
                   <RangePicker
                     onCalendarChange={onCalendarChange}

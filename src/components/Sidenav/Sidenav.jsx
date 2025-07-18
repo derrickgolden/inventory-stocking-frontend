@@ -24,15 +24,17 @@ import {
   WalletOutlined,
 } from "@ant-design/icons";
 import { Menu } from "antd";
-import React from "react";
 import { BiSolidQuoteLeft } from "react-icons/bi";
 import { GiTicket } from "react-icons/gi";
 import { PiWarehouseBold } from "react-icons/pi";
 import { NavLink } from "react-router-dom";
 import getPermissions from "../../utils/getPermissions";
+import { useDispatch } from "react-redux";
 
 const Sidenav = () => {
+  const dispatch = useDispatch();
   const permissions = getPermissions();
+
   const hasPermission = (item) => {
     return permissions?.includes(item ? item : "");
   };
@@ -46,7 +48,7 @@ const Sidenav = () => {
       key: "dashboard",
       icon: <HomeOutlined />,
     },
-    (hasPermission("create-product") || hasPermission("readAll-product")) && {
+    (hasPermission("create-product") && hasPermission("readAll-product")) && {
       label: "INVENTORY",
       key: "inventory",
       icon: <CodeSandboxOutlined />,

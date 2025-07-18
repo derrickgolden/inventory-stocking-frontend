@@ -15,12 +15,14 @@ import { loadAllVatTax } from "../../redux/rtk/features/vatTax/vatTaxSlice";
 import getStaffId from "../../utils/getStaffId";
 import BigDrawer from "../Drawer/BigDrawer";
 import AddCust from "../customer/addCust";
+import { getUserRole } from "../../utils/getPermissions";
 
 const AddSale = ({counterId, bartender}) => {
   const { Option } = Select;
   const [loader, setLoader] = useState(false);
   const [subTotal, setSubTotal] = useState([]);
   const [total, setTotal] = useState(0);
+  const {role, sub} = getUserRole();
   const [afterDiscount, setAfterDiscount] = useState(0);
   const [afterVatTaxAdded, setAfterVatTaxAdded] = useState(0);
   const [due, setDue] = useState(0);
@@ -42,10 +44,11 @@ const AddSale = ({counterId, bartender}) => {
   const staffId = getStaffId();
   const [userId, setUserId] = useState(staffId);
 
-  const allStaff = useSelector((state) => state.users.list);
+  const {list: allStaff, loading: userLoading} = useSelector((state) => state.users);
   const { list: vatTaxList, loading: vatTaxLoading } = useSelector(
     (state) => state.vatTax
   );
+
   useEffect(() => {
     if (bartender && bartender.id) {
       form.setFieldsValue({ userId: bartender.id });
@@ -87,7 +90,6 @@ const AddSale = ({counterId, bartender}) => {
         saleInvoiceProduct: mergedArray,
         counterId
       };
-      console.log({data});
 
       const resp = await dispatch(addSale(data));
       setHold("false");
@@ -131,6 +133,15 @@ const AddSale = ({counterId, bartender}) => {
         const price = current?.productSalePrice || 0;
         const vat = current?.productVat || 0;
         const totalVat = (vat / 100) * price * quantity;
+        const currentQty = current?.currentQuantity || 0;
+
+      // 🛑 Check: is available quantity enough?
+      if (quantity > currentQty) {
+        alert(
+          `Not enough quantity for product ${current?.productName}. Requested: ${quantity}, Available: ${currentQty}`
+        );
+        return subTotal; // skip this item in subtotal
+      }
 
         return [
           ...subTotal,
@@ -289,23 +300,29 @@ const AddSale = ({counterId, bartender}) => {
             >
               <Select
                 className='w-full'
-                loading={!allStaff}
+                loading={userLoading}
                 showSearch
                 placeholder='Select sales person '
                 optionFilterProp='children'
                 onChange={(value) => setUserId(value)}
                 filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
+                  option.children?.toLowerCase().includes(input.toLowerCase())
                 }
               >
-                {allStaff &&
-                  allStaff?.map((info) => (
+                {allStaff && allStaff.length > 0 ? (
+                  allStaff.map((info) => (
                     <Option key={info.id} value={info.id}>
-                      {info.username}
+                      {info.username || `User ID: ${info.id}`}
                     </Option>
-                  ))}
+                  ))
+                ) : (
+                  <Option key={userId} value={userId}>
+                    {bartender?.username || `User ID: ${userId}`}
+                  </Option>
+                )}
               </Select>
             </Form.Item>
+
           </div>
 
           {/* <Form.Item className='' label='Shipping Address' name='address'>
@@ -405,40 +422,43 @@ const AddSale = ({counterId, bartender}) => {
               <span>Total Payable: </span>
               <span>{afterVatTaxAdded.toFixed(2)}</span>
             </div>
-            <div className='flex justify-between items-center mb-2'>
-              <span className=''>Paid Amount: </span>
-              <div className='w-92 flex items-center justify-between gap-2'>
-                <button
-                  className='bg-primary py-1 rounded px-2 text-white'
-                  type='button'
-                  onClick={handlePaidAll}
-                >
-                  Paid All
-                </button>
-                <Form.Item
-                  className='mb-0'
-                  name='paidAmount'
-                  rules={[
-                    {
-                      validator: validatePaidAmount,
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    className='w-72'
-                    onChange={() => totalCalculator()}
-                    size={"small"}
-                  />
-                </Form.Item>
+            {
+              role === "admin" &&
+              <div className='flex justify-between items-center mb-2'>
+                <span className=''>Paid Amount: </span>
+                <div className='w-92 flex items-center justify-between gap-2'>
+                  <button
+                    className='bg-primary py-1 rounded px-2 text-white'
+                    type='button'
+                    onClick={handlePaidAll}
+                  >
+                    Paid All
+                  </button>
+                  <Form.Item
+                    className='mb-0'
+                    name='paidAmount'
+                    rules={[
+                      {
+                        validator: validatePaidAmount,
+                      },
+                    ]}
+                  >
+                    <InputNumber
+                      className='w-72'
+                      onChange={() => totalCalculator()}
+                      size={"small"}
+                    />
+                  </Form.Item>
+                </div>
               </div>
-            </div>
+            }
             <div className='py-1 mb-1 flex justify-between'>
               <strong>Due Amount:</strong>
               <strong>{due.toFixed(2)}</strong>
             </div>
           </div>
           <div className='flex gap-2'>
-            <Form.Item style={{ marginTop: "15px" }} className='w-1/2'>
+            {/* <Form.Item style={{ marginTop: "15px" }} className='w-1/2'>
               <Button
                 block
                 type='dashed'
@@ -454,7 +474,7 @@ const AddSale = ({counterId, bartender}) => {
               >
                 Save Draft
               </Button>
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item style={{ marginTop: "15px" }} className='w-1/2'>
               <Button
                 block

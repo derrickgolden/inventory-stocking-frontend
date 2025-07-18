@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { SearchOutlined } from "@ant-design/icons";
 import { Button, Card, DatePicker, Form, Select } from "antd";
@@ -7,7 +7,7 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadAllSale } from "../../redux/rtk/features/sale/saleSlice";
-import { loadAllStaff } from "../../redux/rtk/features/user/userSlice";
+import { loadAllStaff, loadSingleStaff } from "../../redux/rtk/features/user/userSlice";
 import ViewBtn from "../Buttons/ViewBtn";
 import DashboardCard from "../Card/DashboardCard";
 import StatusSelection from "../CommonUi/StatusSelection";
@@ -16,16 +16,20 @@ import SaleReportPrint from "../Invoice/SaleReport";
 import UserPrivateComponent from "../PrivacyComponent/UserPrivateComponent";
 import { loadAllCounter } from "../../redux/rtk/features/counter/counterSlice";
 import CounterCard from "../Card/CounterCard";
+import { getUserRole } from "../../utils/getPermissions";
 
 const GetAllSale = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const {role, sub} = getUserRole();
+  const staff = useSelector((state) => state?.users?.user?.data);
   const {list, total, loading: saleLoading, } = useSelector((state) => state.sales);
   const userList = useSelector((state) => state.users.list);
   const { list: counterList, total: counterTotal, loading: counterLoading } = useSelector(
       (state) => state.counters
-    );
+  );
 
-    const [user, setUser] = useState("");
+  const [user, setUser] = useState("");
   const [startdate, setStartDate] = useState(
     moment().startOf("month").format("YYYY-MM-DD")
   );
@@ -125,6 +129,18 @@ const GetAllSale = () => {
       ),
     },
   ];
+  
+    useEffect(() =>{
+      if(role === "staff") {
+        dispatch(loadSingleStaff(sub));
+      }
+    },[role, sub, dispatch]);
+
+    useEffect(() =>{
+      if(staff?.roleId === 2 && staff?.counter?.id){
+        navigate(`/admin/sale/counter/${staff.counter.id}`);
+      }
+    }, [staff]);
 
   useEffect(() => {
     dispatch(loadAllStaff({ status: true }));

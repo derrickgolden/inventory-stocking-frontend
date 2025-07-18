@@ -123,17 +123,17 @@ const PrintToPdf = forwardRef(
 													))}
 												</td>
 												<td className='border border-gray-300'>
-													{i.totalAmount}
+													{i?.totalAmount}
 												</td>
-												<td className='border border-gray-300'>{i.discount}</td>
+												<td className='border border-gray-300'>{i?.discount}</td>
 												<td className='border border-gray-300'>
-													{i.totalAmount - i.discount}
-												</td>
-												<td className='border border-gray-300'>
-													{i.paidAmount}
+													{i?.totalAmount - i?.discount}
 												</td>
 												<td className='border border-gray-300'>
-													{i.dueAmount}
+													{i?.paidAmount}
+												</td>
+												<td className='border border-gray-300'>
+													{i?.dueAmount}
 												</td>
 											</tr>
 										))}

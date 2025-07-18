@@ -23,7 +23,7 @@ const DashboardCard = ({ information, count }) => {
 						</span>
 					</div>
 				</div>
-				<div className='ant-shadow dark:bg-[#2e2d35] flex items-center p-8 bg-white rounded-lg dashboard-card-bg'>
+				{/* <div className='ant-shadow dark:bg-[#2e2d35] flex items-center p-8 bg-white rounded-lg dashboard-card-bg'>
 					<div className='inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-violet-600 bg-violet-100 rounded-lg mr-6'>
 						<FaCoins size={30} />
 					</div>
@@ -36,14 +36,14 @@ const DashboardCard = ({ information, count }) => {
 							Total Unsold Amount
 						</span>
 					</div>
-				</div>
+				</div> */}
 				<div className='ant-shadow dark:bg-[#2e2d35] flex items-center p-8 bg-white rounded-lg dashboard-card-bg'>
 					<div className='inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-rose-500 bg-rose-100 rounded-lg mr-6'>
 						<FaMoneyBillTrendUp size={30} />
 					</div>
 					<div>
 						<span className='inline-block text-2xl font-bold'>
-							{information?._sum?.totalQuantity ? information?._sum?.totalQuantity : 0}
+							{information?._sum?.totalAvlStock ? information?._sum?.totalAvlStock : 0}
 						</span>
 
 						<span className='block text-gray-500 dark:text-yellow-50'>

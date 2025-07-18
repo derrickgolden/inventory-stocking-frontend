@@ -18,11 +18,13 @@ import PosPrint from "../Invoice/PosPrint";
 import SaleInvoice from "../Invoice/SaleInvoice";
 import Loader from "../loader/loader";
 import ChangeOrderStatus from "./ChangeOrderStatus";
+import { getUserRole } from "../../utils/getPermissions";
 //PopUp
 
 const DetailSale = () => {
 	const { id } = useParams();
 	let navigate = useNavigate();
+	const {role, sub} = getUserRole();
 
 	//dispatch
 	const dispatch = useDispatch();
@@ -71,47 +73,51 @@ const DetailSale = () => {
 								<SolutionOutlined />
 								<span className='mr-left'>ID : {singleSaleInvoice.id} |</span>
 							</h5>
-							<div className='card-header flex justify-center '>
-								<div className='mr-2'>
-									<Link
-										to={`/admin/payment/customer/${singleSaleInvoice.id}`}
-										state={{ dueAmount: dueAmount }}>
-										<Button
-											type='primary'
-											className='btn-sm'
-											disabled={!dueAmount}>
-											Payment
-										</Button>
-									</Link>
-								</div>
-								<div className='mr-2'>
-									<Link to={`/admin/sale/return/${id}`}>
-										<Button type='primary' shape='round'>
-											{" "}
-											Return Product{" "}
-										</Button>
-									</Link>
-								</div>
+							{
+								role === "admin" && (
+									<div className='card-header flex justify-center '>
+										<div className='mr-2'>
+											<Link
+												to={`/admin/payment/customer/${singleSaleInvoice.id}`}
+												state={{ dueAmount: dueAmount }}>
+												<Button
+													type='primary'
+													className='btn-sm'
+													disabled={!dueAmount}>
+													Payment
+												</Button>
+											</Link>
+										</div>
+										<div className='mr-2'>
+											<Link to={`/admin/sale/return/${id}`}>
+												<Button type='primary' shape='round'>
+													{" "}
+													Return Product{" "}
+												</Button>
+											</Link>
+										</div>
 
-								<div className={"text-end mr-2"}>
-									<SaleInvoice
-										data={singleSaleInvoice}
-										vatAmount={totalVatAmount}
-									/>
-								</div>
-								<div className={"text-end mr-2"}>
-									<PackingSlip data={singleSaleInvoice} />
-								</div>
-								<div className={"text-end mr-2"}>
-									<PosPrint
-										data={singleSaleInvoice}
-										vatAmount={totalVatAmount}
-									/>
-								</div>
-								<div className='text-end mr-2'>
-									<ChangeOrderStatus saleId={singleSaleInvoice.id} />
-								</div>
-							</div>
+										<div className={"text-end mr-2"}>
+											<SaleInvoice
+												data={singleSaleInvoice}
+												vatAmount={totalVatAmount}
+											/>
+										</div>
+										<div className={"text-end mr-2"}>
+											<PackingSlip data={singleSaleInvoice} />
+										</div>
+										<div className={"text-end mr-2"}>
+											<PosPrint
+												data={singleSaleInvoice}
+												vatAmount={totalVatAmount}
+											/>
+										</div>
+										<div className='text-end mr-2'>
+											<ChangeOrderStatus saleId={singleSaleInvoice.id} />
+										</div>
+									</div>
+								)
+							}
 							<div className='card-body mt-5'>
 								<Row justify='space-around'>
 									<Col span={11}>

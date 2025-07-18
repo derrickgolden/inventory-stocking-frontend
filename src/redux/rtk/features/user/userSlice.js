@@ -53,6 +53,7 @@ export const updateStaff = createAsyncThunk(
     }
   }
 );
+
 export const deleteStaff = createAsyncThunk("user/deleteStaff", async (id) => {
   try {
     const { data } = await axios({
@@ -145,13 +146,13 @@ const userSlice = createSlice({
 
     builder.addCase(loadAllStaff.fulfilled, (state, action) => {
       state.loading = false;
-      state.list = action.payload?.data.getAllUser;
-      state.total = action.payload?.data.totalUser;
+      state.list = action.payload?.data?.getAllUser;
+      state.total = action.payload?.data?.totalUser;
     });
 
     builder.addCase(loadAllStaff.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload.message;
+      state.error = action.payload.message || action?.error?.message || "An error occurred";
     });
 
     // 2) ====== builders for addStaff ======
